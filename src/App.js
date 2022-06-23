@@ -3,11 +3,11 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import "./App.css";
 
 import Daycard from "./components/Daycard";
-import shower from "./assets/Shower.png";
 
 import Axios from "axios";
 
 function App() {
+  // for days information
   const [days, setDays] = useState([
     {
       dt: 1655931600,
@@ -49,20 +49,22 @@ function App() {
       dt_txt: "2022-06-22 21:00:00",
     },
   ]);
+  // location
   const [location, setLocation] = useState({});
+  // search value
   const [search, setSearch] = useState("");
-  let apiKey = "your openweather api key";
+  // for reference use use this key
+  let apiKey = "c191b05a0f26393e62f30d19a64d270b";
   const fetchdata = async (city = "indore") => {
     const { data } = await Axios.get(
       `http://api.openweathermap.org/data/2.5/forecast?q=${city}&cnt=5&appid=${apiKey}`
     );
     const value = data;
     setDays(value.list);
-    console.log(value.list);
     setLocation(value.city);
-    console.log(value.city);
   };
 
+  // search
   const handleSubmit = (e) => {
     e.preventDefault();
     let data = search;
@@ -70,10 +72,36 @@ function App() {
     setSearch("");
   };
 
+  // for first load up call
   useEffect(() => {
     fetchdata();
   }, []);
 
+  // for direction
+  const direction = (val) => {
+    const dir = [
+      "N",
+      "NNE",
+      "NE",
+      "ENE",
+      "E",
+      "ESE",
+      "SE",
+      "SSE",
+      "S",
+      "SSW",
+      "SW",
+      "WSW",
+      "W",
+      "WNW",
+      "NW",
+      "NNW",
+      "N",
+    ];
+    return dir[val];
+  };
+
+  // return
   return (
     <div className="container-fluid">
       <div className="row">
@@ -93,7 +121,11 @@ function App() {
           {/* <!-- content --> */}
           {/* <!-- image --> */}
           <div className="mt-5 pt-5 text-center">
-            <img src={shower} width="140" alt="" />
+            <img
+              src={`http://openweathermap.org/img/wn/${days[0].weather[0].icon}@2x.png`}
+              width="140"
+              alt=""
+            />
           </div>
           {/* <!-- temperature  --> */}
           <div className="text-center my-5">
@@ -105,6 +137,7 @@ function App() {
           <div className="mx-5 pt-5 text-center">
             <p>Today . {Date(days[0].dt).slice(0, 10)}</p>
             <p>{location.name}</p>
+            <p>{location.country}</p>
           </div>
         </div>
         {/* <!-- details section  --> */}
@@ -112,11 +145,13 @@ function App() {
           <div className="m-md-5 my-sm-0 my-3">
             {/* <!-- day cards  --> */}
             <div className="row d-flex justify-content-between mx-5">
+              {/* card conditional rendering   */}
               {days.map((day) => {
                 return (
                   <Daycard
                     date={day.dt_txt.slice()}
                     temperature={parseInt(day.main.temp - 273.15)}
+                    icon={day.weather[0].icon}
                   />
                 );
               })}
@@ -134,7 +169,11 @@ function App() {
                     <h4>
                       <span className="head">{days[0].wind.speed}</span>mph
                     </h4>
-                    <p>WSW</p>
+                    <p>
+                      {direction(
+                        Math.floor(days[0].wind.deg / 21.176470588235) - 1
+                      )}
+                    </p>
                   </div>
                 </div>
                 {/* <!-- Humidity --> */}
@@ -186,3 +225,4 @@ function App() {
 }
 
 export default App;
+// application made by your truly brainy_clicks
